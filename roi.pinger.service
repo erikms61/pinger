@@ -1,0 +1,18 @@
+[Unit]
+Description=A pinger to determine network status
+Requires=default.target
+ConditionPathExists=/home/pi/App/pinger.py
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/pi/App/pinger.py
+
+# we restart only after the process has exited cleanly
+# e.g. because no interface was online
+Restart=on-success
+
+#then we retry after 2 minutes
+RestartSec=120
+
+[Install]
+WantedBy=default.target
