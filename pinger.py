@@ -2,6 +2,7 @@ import subprocess
 import shlex
 import time
 import logging
+from pathlib import Path
 
 VERSION = '1.33'
 # ping every sleep_sec seconds
@@ -19,7 +20,8 @@ class Pinger:
         self.current_status = self.old_status = 0
         self.status_time = 0
         self.current_msg = self.old_msg = ''
-        logging.basicConfig(filename='/home/pi/App/ping.log', filemode='a',
+        current_dir = str(Path.cwd())
+        logging.basicConfig(filename=current_dir + '/ping.log', filemode='a',
                             format='%(asctime)s - %(message)s', level=logging.INFO)
 
     def ping(self, iface, host):
@@ -47,7 +49,8 @@ class Pinger:
     def action(self):
         # rigorous action!
         print("we have been offline TOO LONG")
-        logging.error("we have been offline for {} seconds! We DEMAND to be reconnected!".format(int(time.time())-self.status_time))
+        logging.error("we have been offline for {} seconds! We DEMAND to be reconnected!".format(
+            int(time.time()) - self.status_time))
         # e.g. restart _a_ service, or the device etc
         # subprocess.run(shlex.split('reboot'))
 
@@ -68,12 +71,14 @@ class Pinger:
                         if self.status_time == 0:
                             logging.info('+++ {} online'.format(iface))
                         else:
-                            print('{}: {} -> {}'.format(iface, self.old_msg, self.current_msg))
-                            logging.info('{} for {} seconds, now {}'.format(self.old_msg, int(time.time())-self.status_time, self.current_msg))
+                            print('{}: {} -> {}'.format(iface,
+                                  self.old_msg, self.current_msg))
+                            logging.info('{} for {} seconds, now {}'.format(
+                                self.old_msg, int(time.time()) - self.status_time, self.current_msg))
                         self.status_time = int(time.time())
                         self.old_msg = self.current_msg
                         self.old_status = self.current_status
-                    if self.current_status == 0 and time.time()-self.status_time > offline_limit:
+                    if self.current_status == 0 and time.time() - self.status_time > offline_limit:
                         self.action()
                     time.sleep(sleep_sec)
         else:
